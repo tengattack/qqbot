@@ -49,14 +49,14 @@ class MailAgent(object):
         self.smtp_port = 0
         self.imap_port = 0
         self.use_ssl = True
-        
+
         self.__dict__.update(SERVER_LIB.get(server_name, {}))
         self.__dict__.update(config)
 
         self.name = '%s <%s>' % (name or account_name, account)
         self.account = account
         self.auth_code = auth_code
-        
+
         st_SMTP = smtplib.SMTP_SSL if self.use_ssl else smtplib.SMTP
         st_IMAP = imaplib.IMAP4_SSL if self.use_ssl else imaplib.IMAP4
 
@@ -64,15 +64,15 @@ class MailAgent(object):
             self.st_SMTP = lambda : st_SMTP(self.smtp, self.smtp_port)
         else:
             self.st_SMTP = lambda : st_SMTP(self.smtp)
-               
+
         if self.imap_port:
             self.st_IMAP = lambda : st_IMAP(self.imap, self.imap_port)
         else:
             self.st_IMAP = lambda : st_IMAP(self.imap)
-        
+
         self.SMTP = lambda : SMTP(self)
         self.IMAP = lambda : IMAP(self)
-    
+
 class SMTP(object):
     def __init__(self, mail_agent):
         self.name, self.account = mail_agent.name, mail_agent.account
@@ -82,19 +82,19 @@ class SMTP(object):
         except:
             self.close()
             raise
-    
+
     def close(self):
         try:
             return self.server.quit()
         except:
             pass
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-            
+
     def send(self, to_addr, html='', subject='', to_name='', png_content=''):
         subject = subject or 'No subject'
         to_name = to_name or to_addr.split('@')[0]
@@ -111,17 +111,17 @@ class SMTP(object):
         else:
             msg['From'] = self.name
             msg['To'] = '%s <%s>' % (to_name, to_addr)
-            msg['Subject'] = subject    
-        
+            msg['Subject'] = subject
+
         if png_content:
             m = MIMEBase('image', 'png', filename='x.png')
             m.add_header('Content-Disposition', 'attachment', filename='x.png')
             m.add_header('Content-ID', '<0>')
             m.add_header('X-Attachment-Id', '0')
             m.set_payload(png_content)
-            encode_base64(m)        
+            encode_base64(m)
             msg.attach(m)
-        
+
         self.server.sendmail(self.account, to_addr, msg.as_string())
 
 class IMAP(object):
@@ -139,20 +139,20 @@ class IMAP(object):
         except:
             self.close()
             raise
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-    
+
     def close(self):
         try:
             return self.conn.close()
         except:
             pass
 
-#    # NOT SUPPORTED by qq mail.    
+#    # NOT SUPPORTED by qq mail.
 #    def getSubject(self, i):
 #        conn = self.conn
 #        id_list = conn.search(None, 'ALL')[1][0].split()
@@ -166,7 +166,7 @@ class IMAP(object):
 #        subject = s.decode(encoding or 'utf-8').encode('utf-8')
 #        return subject, email_id
 
-#    # NOT SUPPORTED by qq mail.    
+#    # NOT SUPPORTED by qq mail.
 #    def delMail(self, subject):
 #        idx = -1
 #        while True:
@@ -210,9 +210,9 @@ if __name__ == '__main__':
     ma = MailAgent(conf.mailAccount, conf.mailAuthCode)
 
     with ma.SMTP() as s:
-        s.send(conf.mailAccount, 'hello', 'faf房间多啦')
+        s.send(conf.mailTo, 'hello', 'faf房间多啦')
     print('send ok')
-        
+
     with ma.IMAP() as i:
         subject = i.getSubject(-1)
         print('latest email: '+str(subject))

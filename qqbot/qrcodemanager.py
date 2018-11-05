@@ -27,13 +27,13 @@ class QrcodeManager(object):
             )
             StartDaemonThread(self.qrcodeServer.Run)
         else:
-            self.qrcodeServer = None        
+            self.qrcodeServer = None
 
-        if conf.mailAccount:
+        if conf.mailTo and conf.mailAccount:
             self.mailAgent = MailAgent(
-                conf.mailAccount, conf.mailAuthCode, name='QQBot管理员'
+                conf.mailAccount, conf.mailAuthCode, name='QQBot 管理员'
             )
-            
+
             if self.qrcodeServer:
                 html = ('<p>您的 QQBot 正在登录，请尽快用手机 QQ 扫描下面的二维码。'
                         '若二维码已过期，请重新打开本邮件。若您看不到二维码图片，请确保'
@@ -42,25 +42,25 @@ class QrcodeManager(object):
             else:
                 html = ('<p>您的 QQBot 正在登录，请尽快用手机 QQ 扫描下面的二维码。'
                         '若二维码已过期，请将本邮件设为已读邮件，之后 QQBot 会在'
-                        '1~2分钟内将最新的二维码发送到本邮箱。</p>'
+                        '1~2 分钟内将最新的二维码发送到本邮箱。</p>'
                         '<p>{{png}}</p>')
-            
+
             html += '<p>conf.user=%r, conf.qq=%r</p>' % (conf.user, conf.qq)
 
             self.qrcodeMail = {
-                'to_addr': conf.mailAccount,
+                'to_addr': conf.mailTo,
                 'html': html,
-                'subject': ('%s[%s]' % ('QQBot二维码', qrcodeId)),
+                'subject': ('[%s] %s' % ('QQBot 二维码', qrcodeId)),
                 'to_name': '我'
             }
-            
+
             self.qrcode = LockedValue(None)
 
         else:
             self.mailAgent = None
-        
+
         self.cmdQrcode = conf.cmdQrcode
-        
+
         if self.cmdQrcode:
             global Image
             try:
@@ -70,7 +70,7 @@ class QrcodeManager(object):
             except ImportError:
                 ERROR('需要安装 pillow,wcwidth 才能使用文本模式显示二维码')
                 sys.exit(1)
-    
+
     def Show(self, qrcode):
         with open(self.qrcodePath, 'wb') as f:
             f.write(qrcode)
@@ -78,14 +78,14 @@ class QrcodeManager(object):
         from qqbot import _bot
         if hasattr(_bot, 'onQrcode'):
             _bot.onQrcode(self.qrcodePath, qrcode)
-        
+
         if self.cmdQrcode:
             try:
                 showCmdQRCode(self.qrcodePath)
             except Exception as e:
                 WARN('无法以文本模式显示二维码图片 file://%s 。%s',
                      SYSTEMSTR2STR(self.qrcodePath), e)
-        
+
         if not (self.qrcodeServer or self.mailAgent or self.cmdQrcode):
             try:
                 showImage(self.qrcodePath)
@@ -94,7 +94,7 @@ class QrcodeManager(object):
 
         if self.qrcodeServer:
             INFO('请使用浏览器访问二维码，图片地址：%s', self.qrcodeServer.qrcodeURL)
-        
+
         if self.mailAgent:
             if self.qrcode.getVal() is None:
                 self.qrcode.setVal(qrcode)
@@ -102,12 +102,12 @@ class QrcodeManager(object):
                 StartDaemonThread(self.sendEmail)
             else:
                 self.qrcode.setVal(qrcode)
-    
+
     def sendEmail(self):
         lastSubject = ''
         while True:
             if lastSubject != self.qrcodeMail['subject']:
-                qrcode = self.qrcode.getVal()            
+                qrcode = self.qrcode.getVal()
                 if qrcode is None:
                     break
                 qrcode = '' if self.qrcodeServer else qrcode
@@ -124,7 +124,7 @@ class QrcodeManager(object):
                         lastSubject = self.qrcodeMail['subject']
             else:
                 time.sleep(65)
-                qrcode = self.qrcode.getVal()            
+                qrcode = self.qrcode.getVal()
                 if qrcode is None:
                     break
                 try:
@@ -135,11 +135,11 @@ class QrcodeManager(object):
                     WARN('查询邮箱 %s 中的邮件失败 %s', self.mailAgent.account, e)
                 else:
                     DEBUG('最近的邮件： %s', lastSubject)
-    
+
     def Destroy(self):
         if self.mailAgent:
             self.qrcode.setVal(None)
-        
+
         if self.qrcodeServer:
             self.qrcodeServer.Stop()
 
@@ -172,7 +172,7 @@ def showCmdQRCode(filename):
     size=33
     padding=1
     rgb=Image.open(filename).resize((size,size)).convert('RGB')
-    
+
     qrtext = '0' * (size + padding * 2) + '\n'
     for rr in range(size):
         qrtext += '0'*padding
@@ -194,9 +194,9 @@ def showCmdQRCode(filename):
         white = 'MM'
     else:
         white = b
-        
+
     black='  '
-    
+
     # currently for Windows, '\u2588' is not correct. So use 'MM' for windows.
     osName = platform.system()
     if osName == 'Windows':

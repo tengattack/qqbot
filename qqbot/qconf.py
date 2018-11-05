@@ -15,55 +15,58 @@ sampleConfStr = '''
     #     根配置 -> 默认配置 -> 用户 somebody 的配置 -> 命令行参数配置
     # 使用 qqbot 启动程序时，依次加载：
     #     根配置 -> 默认配置 -> 命令行参数配置
-    
+
     # 用户 somebody 的配置
     "somebody" : {
-        
+
         # QQBot-term （HTTP-API） 服务器端口号（该服务器监听 IP 为 127.0.0.1 ）
         # 设置为 0 则不会开启本服务器（此时 qq 命令和 HTTP-API 接口都无法使用）。
         "termServerPort" : 8188,
-        
+
         # 二维码 http 服务器 ip，请设置为公网 ip 或空字符串
         "httpServerIP" : "",
-        
+
         # 二维码 http 服务器端口号
         "httpServerPort" : 8189,
-        
+
         # 自动登录的 QQ 号
         "qq" : "3497303033",
-        
+
         # 接收二维码图片的邮箱账号
+        "mailTo" : "3497303033@qq.com",
+
+        # 发送二维码图片的邮箱账号
         "mailAccount" : "3497303033@qq.com",
-        
+
         # 该邮箱的 IMAP/SMTP 服务授权码
         "mailAuthCode" : "feregfgftrasdsew",
-        
+
         # 是否以文本模式显示二维码
         "cmdQrcode" : False,
-    
+
         # 显示/关闭调试信息
         "debug" : False,
 
         # QQBot 掉线后自动重启
         "restartOnOffline" : False,
-        
+
         # 在后台运行 qqbot ( daemon 模式)
         "daemon": False,
-        
-        # 完成全部联系人列表获取之后才启动 QQBot 
+
+        # 完成全部联系人列表获取之后才启动 QQBot
         "startAfterFetch" : False,
-        
+
         # 插件目录
         "pluginPath" : ".",
-        
+
         # 启动时需加载的插件
         "plugins" : [],
-        
+
         # 插件的配置（由用户自定义）
         "pluginsConf" : {},
-    
+
     },
-    
+
     # 可以在 默认配置 中配置所有用户都通用的设置
     "默认配置" : {
         "qq" : "",
@@ -76,13 +79,14 @@ sampleConfStr = '''
 	        'qqbot.plugins.schedrestart': '8:00',
 	    }
     },
-    
+
     # # 注意：根配置是固定的，用户无法修改（在本文件中修改根配置不会生效）
     # "根配置" : {
     #     "termServerPort" : 8188,
     #     "httpServerIP" : "",
     #     "httpServerPort" : 8189,
     #     "qq" : "",
+    #     "mailTo" : "",
     #     "mailAccount" : "",
     #     "mailAuthCode" : "",
     #     "cmdQrcode" : False,
@@ -103,6 +107,7 @@ rootConf = {
     "httpServerIP" : "",
     "httpServerPort" : 8189,
     "qq" : "",
+    "mailTo" : "",
     "mailAccount" : "",
     "mailAuthCode" : "",
     "cmdQrcode" : False,
@@ -125,7 +130,7 @@ QQBot 机器人
 
 用法: {PROGNAME} [-h] [-d] [-nd] [-u USER] [-q QQ]
           [-p TERMSERVERPORT] [-ip HTTPSERVERIP][-hp HTTPSERVERPORT]
-          [-m MAILACCOUNT] [-mc MAILAUTHCODE] [-r] [-nr]
+          [-m MAILTO] [-ma MAILACCOUNT] [-mc MAILAUTHCODE] [-r] [-nr]
           [-fi FETCHINTERVAL]
 
 选项:
@@ -143,7 +148,7 @@ QQBot 机器人
                             pickle 文件、联系人 db 文件 以及 临时二维码图片保存在
                             工作目录下。
 
-  登陆:
+  登录:
     -u USER, --user USER    指定一个配置文件项目以导入设定。
                             USER 指的是配置文件项目的名称。
                             注意: 所有从命令行中指定的参数设定的优先级都会高于
@@ -167,8 +172,10 @@ QQBot 机器人
 
   邮件(IMAP)发送二维码设置:
   (请阅读说明文件以了解如何通过邮件发送二维码，)
-    -m MAILACCOUNT, --mailAccount MAILACCOUNT
+    -m MAILTO, --mailTo MAILTO
                             指定用于接收二维码的收件邮箱地址。
+    -ma MAILACCOUNT, --mailAccount MAILACCOUNT
+                            指定用于发送二维码的收件邮箱地址。
     -mc MAILAUTHCODE, --mailAuthCode MAILAUTHCODE
                             设置接收账户的授权码(如果需要的话)。
                             如果命令行和配置文件中都没有指定授权码，而收件
@@ -208,7 +215,7 @@ class QConf(object):
         self.readCmdLine(argv)
         self.readConfFile()
         self.configure()
-    
+
     def readCmdLine(self, argv):
         if argv is None:
             argv = sys.argv[1:]
@@ -225,26 +232,28 @@ class QConf(object):
 
         parser.add_argument('-p', '--termServerPort', type=int)
 
-        parser.add_argument('-ip', '--httpServerIP')                            
+        parser.add_argument('-ip', '--httpServerIP')
 
-        parser.add_argument('-hp', '--httpServerPort', type=int)        
+        parser.add_argument('-hp', '--httpServerPort', type=int)
 
-        parser.add_argument('-m', '--mailAccount')
+        parser.add_argument('-m', '--mailTo')
 
-        parser.add_argument('-mc', '--mailAuthCode') 
+        parser.add_argument('-ma', '--mailAccount')
+
+        parser.add_argument('-mc', '--mailAuthCode')
 
         parser.add_argument('-cq', '--cmdQrcode',
                             action='store_true', default=None)
 
         parser.add_argument('-d', '--debug',
-                            action='store_true', default=None)        
+                            action='store_true', default=None)
 
-        parser.add_argument('-nd', '--nodebug', action='store_true')        
+        parser.add_argument('-nd', '--nodebug', action='store_true')
 
         parser.add_argument('-r', '--restartOnOffline',
                             action='store_true', default=None)
 
-        parser.add_argument('-nr', '--norestart', action='store_true') 
+        parser.add_argument('-nr', '--norestart', action='store_true')
 
         parser.add_argument('-dm', '--daemon',
                             action='store_true', default=None)
@@ -262,29 +271,29 @@ class QConf(object):
             opts = parser.parse_args(argv)
         except:
             PRINT(usage)
-            sys.exit(1)            
-        
+            sys.exit(1)
+
         if opts.help:
             PRINT(usage)
             sys.exit(0)
-        
+
         if opts.nodebug:
             opts.debug = False
-        
+
         if opts.norestart:
             opts.restartOnOffline = False
 
         if opts.nodaemon:
             opts.daemon = False
-        
+
         delattr(opts, 'nodebug')
         delattr(opts, 'norestart')
         delattr(opts, 'nodaemon')
-        
+
         if not opts.bench:
             opts.bench = os.path.join(os.path.expanduser('~'), '.qqbot-tmp')
-        
-        opts.bench = os.path.abspath(opts.bench)        
+
+        opts.bench = os.path.abspath(opts.bench)
         opts.benchstr = SYSTEMSTR2STR(opts.bench)
 
         if not os.path.exists(opts.bench):
@@ -296,13 +305,13 @@ class QConf(object):
         elif not os.path.isdir(opts.bench):
             PRINT('无法创建工作目录 %s ' % opts.benchstr)
             sys.exit(1)
-        
+
         if opts.plugins:
             opts.plugins = SYSTEMSTR2STR(opts.plugins).split(',')
-        
+
         if opts.pluginPath:
             opts.pluginPath = SYSTEMSTR2STR(opts.pluginPath)
-        
+
         for k, v in list(opts.__dict__.items()):
             if getattr(self, k, None) is None:
                 setattr(self, k, v)
@@ -316,39 +325,39 @@ class QConf(object):
             try:
                 with open(confPath, 'rb') as f:
                     cusConf = ast.literal_eval(BYTES2STR(f.read()))
-    
+
                 if type(cusConf) is not dict:
                     raise ConfError('文件内容必须是一个 dict')
 
                 if type(cusConf.get('默认配置', {})) is not dict:
                     raise ConfError('默认配置必须是一个 dict')
-                
+
                 if self.user is not None:
                     if self.user not in cusConf:
-                        raise ConfError('用户 %s 不存在' % self.user)                        
+                        raise ConfError('用户 %s 不存在' % self.user)
                     elif type(cusConf[self.user]) is not dict:
-                        raise ConfError('用户 %s 的配置必须是一个 dict'%self.user)                    
+                        raise ConfError('用户 %s 的配置必须是一个 dict'%self.user)
                     else:
                         names = ['默认配置', self.user]
                 else:
                     names = ['默认配置']
-                    
+
                 for name in names:
                     for k, v in list(cusConf.get(name, {}).items()):
                         if k in deprecatedConfKeys:
                             PRINT('被废弃的配置选项 %s ，将忽略此选项' % k)
                         elif k not in conf:
-                            raise ConfError('不存在的配置选项 %s.%s ' % (name, k))                               
+                            raise ConfError('不存在的配置选项 %s.%s ' % (name, k))
                         elif type(v) is not type(conf[k]):
                             t = type(conf[k]).__name__
                             raise ConfError('%s.%s 必须是一个 %s' % (name, k, t))
                         else:
                             conf[k] = v
-                            
+
             except (IOError, SyntaxError, ValueError, ConfError) as e:
                 PRINT('配置文件 %s 错误: %s\n' % (strConfPath, e), end='')
                 sys.exit(1)
-        
+
         else:
             PRINT('未找到配置文件“%s”，将使用默认配置' % strConfPath)
             try:
@@ -358,11 +367,11 @@ class QConf(object):
                 pass
             else:
                 PRINT('已创建一个默认配置文件“%s”' % strConfPath)
-            
+
             if self.user is not None:
                 PRINT('用户 %s 不存在\n' % self.user, end='')
                 sys.exit(1)
-        
+
         for k, v in list(conf.items()):
             if getattr(self, k, None) is None:
                 setattr(self, k, v)
@@ -371,12 +380,12 @@ class QConf(object):
             PRINT('配置文件 %s 错误: 插件目录 “%s” 不存在\n' % \
                   (strConfPath, self.pluginPath), end='')
             sys.exit(1)
-        
-        if self.mailAccount and not self.mailAuthCode:
+
+        if self.mailTo and self.mailAccount and not self.mailAuthCode:
             msg = '请输入 %s 的 IMAP/SMTP 服务授权码： ' % self.mailAccount
             self.mailAuthCode = RAWINPUT(msg)
-        
-        
+
+
         if self.cmdQrcode:
             try:
                 import PIL
@@ -384,7 +393,7 @@ class QConf(object):
             except ImportError:
                 PRINT('您已选择以文本模式显示二维码，请先安装 pillow, wcwidth 库')
                 sys.exit(1)
-                
+
     def configure(self):
         p = self.absPath('plugins')
         if not os.path.exists(p):
@@ -410,7 +419,7 @@ class QConf(object):
             import qqbotdefault as q
         except ImportError:
             pass
-        else:        
+        else:
             for x,name,y in pkgutil.iter_modules(q.__path__, q.__name__+'.'):
                 self.plugins.append(name)
 
@@ -422,13 +431,14 @@ class QConf(object):
         INFO('工作目录：%s', self.benchstr)
         INFO('配置文件：%s', SYSTEMSTR2STR(self.ConfPath()))
         INFO('用户名：%s', self.user or '无')
-        INFO('登录方式：%s', self.qq and ('自动（qq=%s）' % self.qq) or '手动')        
+        INFO('登录方式：%s', self.qq and ('自动（qq=%s）' % self.qq) or '手动')
         INFO('命令行服务器端口号：%s', self.termServerPort or '无')
         INFO('二维码服务器 ip ：%s', self.httpServerIP or '无')
         INFO('二维码服务器端口号：%s',
              self.httpServerIP and self.httpServerPort or '无')
-        INFO('用于接收二维码的邮箱账号：%s', self.mailAccount or '无')
-        INFO('邮箱服务授权码：%s', self.mailAccount and '******' or '无')
+        INFO('用于接收二维码的邮箱账号：%s', self.mailTo or '无')
+        INFO('用于发送二维码的邮箱账号：%s', self.mailAccount or '无')
+        INFO('邮箱服务授权码：%s', self.mailAuthCode and '******' or '无')
         INFO('以文本模式显示二维码：%s', self.cmdQrcode and '是' or '否')
         INFO('调试模式：%s', self.debug and '开启' or '关闭')
         INFO('掉线后自动重启：%s', self.restartOnOffline and '是' or '否')
@@ -454,10 +464,10 @@ class QConf(object):
 
     def QrcodePath(self, qrcodeId):
         return self.absPath(qrcodeId+'.png')
-    
+
     def SetQQ(self, qq):
         self.qq = qq
-    
+
     def StoreQQ(self):
         if not self.qq:
             return
@@ -468,11 +478,11 @@ class QConf(object):
                 f.write(self.qq)
         except Exception as e:
             ERROR('无法保存当前 QQ 号码, %s', e)
-    
+
     def LoadQQ(self):
         time.sleep(0.5)
         fn = self.absPath('qq(pid%s)' % os.getpid())
-        
+
         if not os.path.exists(fn):
             return self.qq
 
@@ -484,14 +494,14 @@ class QConf(object):
             qq = self.qq
         else:
             self.qq = qq
-            
+
         try:
             os.remove(fn)
         except OSError:
             pass
 
         return qq
-    
+
     def Daemonize(self):
         if daemonable:
             logfile = self.absPath('daemon-%s.log' % self.qq)

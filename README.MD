@@ -194,7 +194,7 @@ contact 代表消息发送者，其 ctype 属性可以为 `buddy`/`group`/`discu
 
 member 仅当本消息为  群消息或讨论组消息 时有效，代表实际发消息的成员，它的 ctype 属性可以为 `group-member`/`discuss-member` ，代表 群成员/讨论组成员 对象。当本消息为 好友消息 时， member 等于 None 。
 
-contact 和 member 都是 QContact 对象，不同类型的 QContact 对象所具有的属性含义见： [qcontact-attr](https://github.com/pandolia/qqbot/blob/master/qcontact-attr.md) 。注意所有 QContact 对象都是 **只读对象** ，只能读取它的属性，不能设置它的属性，也不能向它添加额外的属性。 
+contact 和 member 都是 QContact 对象，不同类型的 QContact 对象所具有的属性含义见： [qcontact-attr](https://github.com/pandolia/qqbot/blob/master/qcontact-attr.md) 。注意所有 QContact 对象都是 **只读对象** ，只能读取它的属性，不能设置它的属性，也不能向它添加额外的属性。
 
 可以调用 QQBot 对象的 SendTo 接口向 QContact 对象发送消息，但要注意：只可以向 好友/群/讨论组 发消息， **不可以向 群成员/讨论组成员 发送消息** 。也就是说，只可以调用 bot.SendTo(contact, 'xxx') ， 不可以调用 bot.SendTo(member, 'xxx') 。
 
@@ -249,7 +249,7 @@ QQBot 对象提供 List/Update/SendTo/Plug/Unplug/Login/Stop/Restart/FreshRestar
     >>> g = bot.List('group')[0]   				# g 是一个 Group 对象
     >>> print([g, type(g), g.qq, g.name, g.uin, g.mark])	# 打印 g 的各项属性
 
-不同类型的 QContact 对象所具有的属性含义见： [qcontact-attr](https://github.com/pandolia/qqbot/blob/master/qcontact-attr.md) 。 
+不同类型的 QContact 对象所具有的属性含义见： [qcontact-attr](https://github.com/pandolia/qqbot/blob/master/qcontact-attr.md) 。
 
 #### （2） bot.Update(tinfo) --> True/False
 
@@ -292,7 +292,7 @@ Update 接口的参数 tinfo 和 List 接口中的参数含义相同，调用此
     >>> if bl:
     >>>     b = bl[0]
     >>>     bot.SendTo(b, 'hello')
- 
+
 #### （4） bot.conf
 
 bot.conf 中保存全局的配置信息，各项配置详见本文档第七节。如 bot.conf.termServerPort 保存 QQBot 命令行服务器的端口号， bot.conf.qq 保存本次登录的 QQ 号码。
@@ -396,63 +396,66 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
 #### 配置文件的使用方法
 
 配置文件为 **~/.qqbot-tmp/v2.x.conf** （ **\~** 代表用户主目录， win7 下为 C:\\Users\\xxx ， linux 下为 /home/xxx ），第一次运行 QQBot 后就会自动创建这个配置文件，其中内容如下：
-    
+
     {
-    
+
         # QQBot 的配置文件
         # 使用 qqbot -u somebody 启动程序时，依次加载：
         #     根配置 -> 默认配置 -> 用户 somebody 的配置 -> 命令行参数配置
         # 使用 qqbot 启动程序时，依次加载：
         #     根配置 -> 默认配置 -> 命令行参数配置
-        
+
         # 用户 somebody 的配置
         "somebody" : {
-            
+
             # QQBot-term （HTTP-API） 服务器端口号（该服务器监听 IP 为 127.0.0.1 ）
             # 设置为 0 则不会开启本服务器（此时 qq 命令和 HTTP-API 接口都无法使用）。
             "termServerPort" : 8188,
-            
+
             # 二维码 http 服务器 ip，请设置为公网 ip 或空字符串
             "httpServerIP" : "",
-            
+
             # 二维码 http 服务器端口号
             "httpServerPort" : 8189,
-            
+
             # 自动登录的 QQ 号
             "qq" : "3497303033",
-            
+
             # 接收二维码图片的邮箱账号
+            "mailTo" : "3497303033@qq.com",
+
+            # 发送二维码图片的邮箱账号
             "mailAccount" : "3497303033@qq.com",
-            
+
             # 该邮箱的 IMAP/SMTP 服务授权码
             "mailAuthCode" : "feregfgftrasdsew",
-            
+
             # 是否以文本模式显示二维码
             "cmdQrcode" : False,
-        
+
             # 显示/关闭调试信息
             "debug" : False,
-    
+
             # QQBot 掉线后自动重启
             "restartOnOffline" : False,
-            
+
             # 在后台运行 qqbot ( daemon 模式)
             "daemon": False,
-            
-            # 完成全部联系人列表获取之后才启动 QQBot 
+
+            # 完成全部联系人列表获取之后才启动 QQBot
             "startAfterFetch" : False,
-            
+
             # 插件目录
             "pluginPath" : ".",
-            
+
             # 启动时需加载的插件
             "plugins" : [],
-            
+
             # 插件的配置（由用户自定义）
             "pluginsConf" : {},
-        
+
         },
-        
+
         # 可以在 默认配置 中配置所有用户都通用的设置
         "默认配置" : {
             "qq" : "",
@@ -465,13 +468,14 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
                 'qqbot.plugins.schedrestart': '8:00',
             }
         },
-        
+
         # # 注意：根配置是固定的，用户无法修改（在本文件中修改根配置不会生效）
         # "根配置" : {
         #     "termServerPort" : 8188,
         #     "httpServerIP" : "",
         #     "httpServerPort" : 8189,
         #     "qq" : "",
+        #     "mailTo" : "",
         #     "mailAccount" : "",
         #     "mailAuthCode" : "",
         #     "cmdQrcode" : False,
@@ -483,16 +487,16 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
         #     "plugins" : [],
         #     "pluginsConf" : {}
         # },
-    
+
     }
 
 可以在配置文件中添加自己的用户配置（即在该文件的字典中新增一个 item ，此 item 的 key 就代表一个用户），例如，该文件中已有的 somebody 项目就代表名为 somebody 的用户，运行 QQBot 时，输入 **qqbot -u somebody** ，则会加载 somebody 项目下的各项配置。
 
 下面介绍配置文件中各项配置的功能，以下内容均假定已修改了 somebody 下的配置，且以 **qqbot -u somebody** 的方式运行。
 
-#### 邮箱模式的配置（ mailAccount 和 mailAuthCode ）
+#### 邮箱模式的配置（ mailTo、mailAccount 和 mailAuthCode ）
 
-如果需要使用邮箱模式显示二维码，可以将 mailAccount 和 mailAuthCode 项中分别设置为邮箱帐号和授权码，运行后，二维码管理器会将二维码图片发送至该邮箱。
+如果需要使用邮箱模式显示二维码，可以将 mailAccount 和 mailAuthCode 项中分别设置为邮箱帐号和授权码，运行后，二维码管理器会将二维码图片发送至 mailTo 邮箱。
 
 注意：授权码不是邮箱的登录密码，而是邮箱服务商提供的开通 **IMAP/SMTP** 服务的授权码（提醒：不是 **POP3/SMTP** 服务）， QQ/网易 邮箱可以在网页版的邮箱设置里面开通此项服务，并得到授权码。如果只定义了 mailAccount 而没定义 mailAuthCode ，则程序运行的开始时会要求手工输入此授权码。
 
@@ -619,7 +623,7 @@ qqbot 运行时，会在 工作目录 下 搜索/创建 以下 文件/目录 ：
 
 #### 插件列表
 
-|名称                |github作者    | 功能说明                 | 是否默认加载                 
+|名称                |github作者    | 功能说明                 | 是否默认加载
 |:-------------------|:-------------|:----------------------------|:----------------------------
 |[qqbot.plugins.sampleslots](https://github.com/pandolia/qqbot/blob/master/qqbot/plugins/sampleslots.py)             |[pandolia](https://github.com/pandolia)       |回调函数示例       |是
 |[qqbot.plugins.schedrestart](https://github.com/pandolia/qqbot/blob/master/qqbot/plugins/schedrestart.py)             |[pandolia](https://github.com/pandolia)       |定时重启       |是
