@@ -23,7 +23,8 @@ class QrcodeManager(object):
                 conf.httpServerIP,
                 conf.httpServerPort,
                 self.qrcodePath,
-                qrcodeId
+                qrcodeId,
+                conf.httpServerPublicUrl,
             )
             StartDaemonThread(self.qrcodeServer.Run)
         else:
@@ -115,9 +116,9 @@ class QrcodeManager(object):
                     with self.mailAgent.SMTP() as smtp:
                         smtp.send(png_content=qrcode, **self.qrcodeMail)
                 except Exception as e:
-                    WARN('无法将二维码发送至邮箱%s %s', self.mailAgent.account, e, exc_info=True)
+                    WARN('无法将二维码发送至邮箱 %s %s', self.qrcodeMail['to_addr'], e, exc_info=True)
                 else:
-                    INFO('已将二维码发送至邮箱%s', self.mailAgent.account)
+                    INFO('已将二维码发送至邮箱 %s', self.qrcodeMail['to_addr'])
                     if self.qrcodeServer:
                         break
                     else:
@@ -134,7 +135,7 @@ class QrcodeManager(object):
                 except Exception as e:
                     WARN('查询邮箱 %s 中的邮件失败 %s', self.mailAgent.account, e)
                 else:
-                    DEBUG('最近的邮件： %s', lastSubject)
+                    DEBUG('最近的邮件：%s', lastSubject)
 
     def Destroy(self):
         if self.mailAgent:

@@ -418,6 +418,9 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
             # 二维码 http 服务器端口号
             "httpServerPort" : 8189,
 
+            # 二维码 http 服务器公共访问地址
+            "httpServerPublicUrl" : "",
+
             # 自动登录的 QQ 号
             "qq" : "3497303033",
 
@@ -474,6 +477,7 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
         #     "termServerPort" : 8188,
         #     "httpServerIP" : "",
         #     "httpServerPort" : 8189,
+        #     "httpServerPublicUrl" : "",
         #     "qq" : "",
         #     "mailTo" : "",
         #     "mailAccount" : "",
@@ -502,9 +506,9 @@ GUI 模式是默认的模式，只适用于个人电脑。邮箱模式可以适�
 
 邮箱模式已在 QQ 、 网易 和 Google 邮箱中测试过。
 
-#### 服务器模式的配置（ httpServerIP 和 httpServerPort ）
+#### 服务器模式的配置（ httpServerIP、httpServerPort 和 httpServerPublicUrl ）
 
-如果需要使用服务器模式，可以配置 httpServerIP 和 httpServerPort 项，一般来说应该设置为公网 ip 。服务器模式开启后，可以通过 http://{httpServerIP}:{httpServerPort}/{any} 来访问二维码图片。其中 {any} 可以是任何非空的数字或字母串。
+如果需要使用服务器模式，可以配置 httpServerIP 和 httpServerPort 项，一般来说应该设置为公网 ip 。服务器模式开启后，可以通过 http://{httpServerIP}:{httpServerPort}/{any} 或是 {httpServerPublicUrl}/{any} 来访问二维码图片。其中 {any} 可以是任何非空的数字或字母串。
 
 当邮箱模式和服务器模式同时开启时，发邮件时不会发送真正的图片，只会将图片地址发到邮箱中去，而且只发送一次，二维码过期时刷新一下邮件就可以了。如果只开启邮箱模式，则发邮件时会发送真正的图片，当二维码过期时，需要将邮件设置为已读（用手机 QQ 点开邮件后该邮件就是已读了），之后才会发送最新的二维码图片。
 

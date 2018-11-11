@@ -29,6 +29,9 @@ sampleConfStr = '''
         # 二维码 http 服务器端口号
         "httpServerPort" : 8189,
 
+        # 二维码 http 服务器公共访问地址
+        "httpServerPublicUrl" : "",
+
         # 自动登录的 QQ 号
         "qq" : "3497303033",
 
@@ -85,6 +88,7 @@ sampleConfStr = '''
     #     "termServerPort" : 8188,
     #     "httpServerIP" : "",
     #     "httpServerPort" : 8189,
+    #     "httpServerPublicUrl" : "",
     #     "qq" : "",
     #     "mailTo" : "",
     #     "mailAccount" : "",
@@ -106,6 +110,7 @@ rootConf = {
     "termServerPort" : 8188,
     "httpServerIP" : "",
     "httpServerPort" : 8189,
+    "httpServerPublicUrl" : "",
     "qq" : "",
     "mailTo" : "",
     "mailAccount" : "",
@@ -169,6 +174,8 @@ QQBot 机器人
     -hp HTTPSERVERPORT, --httpServerPort HTTPSERVERPORT
                             指定HTTP服务要监听在哪个端口上。
                               默认的监听端口是 8189 (TCP)
+    -pu HTTPSERVERPUBLICURL, --httpServerPublicUrl HTTPSERVERPUBLICURL
+                            指定HTTP服务公共访问地址。
 
   邮件(IMAP)发送二维码设置:
   (请阅读说明文件以了解如何通过邮件发送二维码，)
@@ -235,6 +242,8 @@ class QConf(object):
         parser.add_argument('-ip', '--httpServerIP')
 
         parser.add_argument('-hp', '--httpServerPort', type=int)
+
+        parser.add_argument('-pu', '--httpServerPublicUrl')
 
         parser.add_argument('-m', '--mailTo')
 
@@ -436,6 +445,8 @@ class QConf(object):
         INFO('二维码服务器 ip ：%s', self.httpServerIP or '无')
         INFO('二维码服务器端口号：%s',
              self.httpServerIP and self.httpServerPort or '无')
+        INFO('二维码服务器公共访问地址：%s',
+             self.httpServerIP and self.httpServerPublicUrl or '无')
         INFO('用于接收二维码的邮箱账号：%s', self.mailTo or '无')
         INFO('用于发送二维码的邮箱账号：%s', self.mailAccount or '无')
         INFO('邮箱服务授权码：%s', self.mailAuthCode and '******' or '无')

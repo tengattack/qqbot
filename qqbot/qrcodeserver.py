@@ -12,10 +12,13 @@ from qqbot.common import STR2BYTES, BYTES2STR, SYSTEMSTR2STR
 from qqbot.utf8logger import ERROR
 
 class QrcodeServer(MySocketServer):
-    def __init__(self, ip, port, qrcodePath, qrcodeId):
+    def __init__(self, ip, port, qrcodePath, qrcodeId, publicUrl = ''):
         MySocketServer.__init__(self, '0.0.0.0', port, '二维码 HTTP 服务器')
         self.qrcodePath = qrcodePath
-        self.qrcodeURL = 'http://%s:%s/%s' % (ip, port, qrcodeId)
+        if publicUrl:
+            self.qrcodeURL = '%s/%s' % (publicUrl, qrcodeId)
+        else:
+            self.qrcodeURL = 'http://%s:%s/%s' % (ip, port, qrcodeId)
 
     def response(self, request):
         request = BYTES2STR(request)
