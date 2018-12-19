@@ -10,7 +10,7 @@ from qqbot.common import BYTES2STR, SYSTEMSTR2BYTES
 from qqbot.mysocketserver import MySocketServer, Query
 from qqbot.mainloop import Put
 
-HOST, DEFPORT = '127.0.0.1', 8188
+HOST, DEFPORT = os.getenv('TERM_HOST', '127.0.0.1'), 8188
 
 class QTermServer(MySocketServer):
     def __init__(self, port, onCommand):
